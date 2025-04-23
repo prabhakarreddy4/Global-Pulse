@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Pulse - 24/7 World News</title>
+    <meta name="monetag" content="89eea797b739f22dc57335227628efbe">
+    <script src="https://kulroakonsu.net/88/tag.min.js" data-zone="142501" async data-cfasync="false"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #1a252f;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background: var(--light);
+            color: var(--dark);
+        }
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .logo {
+            font-size: 2.8rem;
+            margin: 0;
+            background: linear-gradient(45deg, #e74c3c, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .news-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .news-card:hover {
+            transform: translateY(-5px);
+        }
+        .news-image {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+        }
+        .news-content {
+            padding: 1.5rem;
+        }
+        .news-title {
+            font-size: 1.3rem;
+            margin: 0 0 0.5rem 0;
+            color: var(--primary);
+        }
+        .news-desc {
+            color: #666;
+            line-height: 1.5;
+        }
+        .read-more {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.6rem 1.2rem;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        .updating-message {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 2rem;
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="logo">Global Pulse</h1>
+        <p>Your 24/7 source for world news</p>
+    </header>
+
+    <div class="news-grid" id="news-container">
+        <div class="updating-message">
+            <p>Loading latest headlines...</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2024 Global Pulse | News aggregated under Fair Use</p>
+    </footer>
+
+    <script>
+        // ======================
+        // RELIABLE NEWS LOADER
+        // ======================
+        async function loadNews() {
+            try {
+                // Try multiple APIs in sequence if one fails
+                const apis = [
+                    'https://gnews.io/api/v4/top-headlines?token=7ce5544772d2011222e8bdf1933809fc&lang=en&max=40',
+                    'https://newsapi.org/v2/top-headlines?country=us&pageSize=40&apiKey=9e9c4f7e4f5d4c2a9e9c4f7e4f5d4c2a',
+                    'https://api.currentsapi.services/v1/latest-news?apiKey=YOUR_CURRENTS_API_KEY'
+                ];
+                
+                let success = false;
+                
+                for (const apiUrl of apis) {
+                    try {
+                        const response = await fetch(apiUrl);
+                        if (!response.ok) continue;
+                        
+                        const data = await response.json();
+                        const articles = data.articles || data.news || data.response.docs || [];
+                        
+                        if (articles.length > 0) {
+                            displayNews(articles.slice(0, 40));
+                            success = true;
+                            break;
+                        }
+                    } catch (e) {
+                        console.log(`API ${apiUrl} failed, trying next...`);
+                    }
+                }
+                
+                if (!success) {
+                    showFallbackNews();
+                }
+                
+            } catch (error) {
+                console.error("All news sources failed:", error);
+                showFallbackNews();
+            }
+            
+            // Auto-refresh every 2 hours
+            setTimeout(loadNews, 7200000);
+        }
+        
+        function displayNews(articles) {
+            let html = '';
+            articles.forEach(article => {
+                html += `
+                    <div class="news-card">
+                        <div class="news-image" 
+                             style="background-image:url('${article.image || article.urlToImage || 'https://via.placeholder.com/300x180?text=Global+Pulse'}')">
+                        </div>
+                        <div class="news-content">
+                            <h3 class="news-title">${article.title || 'Breaking News'}</h3>
+                            <p class="news-desc">${article.description || 'Click to read full story'}</p>
+                            <a href="${article.url || '#'}" target="_blank" class="read-more">Read Full Story</a>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('news-container').innerHTML = html;
+        }
+        
+        function showFallbackNews() {
+            const fallbackNews = [
+                {
+                    title: "Global Summit Addresses Climate Change",
+                    description: "World leaders gather to discuss urgent environmental policies.",
+                    url: "#",
+                    image: "https://via.placeholder.com/300x180?text=Climate+Summit"
+                },
+                {
+                    title: "Tech Giant Unveils New AI Assistant",
+                    description: "Revolutionary AI promises to transform daily productivity.",
+                    url: "#",
+                    image: "https://via.placeholder.com/300x180?text=AI+Breakthrough"
+                },
+                {
+                    title: "Stock Markets Reach Record Highs",
+                    description: "Global markets surge amid economic recovery optimism.",
+                    url: "#",
+                    image: "https://via.placeholder.com/300x180?text=Stock+Market"
+                }
+            ];
+            
+            displayNews(fallbackNews);
+            document.getElementById('news-container').innerHTML += `
+                <div class="updating-message">
+                    <p>We're experiencing high demand. Normal service will resume shortly.</p>
+                </div>
+            `;
+        }
+        
+        // Start the news loader
+        loadNews();
+    </script>
+</body>
+</html>
